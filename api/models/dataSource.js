@@ -1,7 +1,7 @@
-const { DataSource } = require('typeorm');
+const { DataSource } = require("typeorm");
 
 const dataSource = new DataSource({
-  type: 'mysql',
+  type: process.env.DB_TYPE,
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   username: process.env.DB_USERNAME,
@@ -9,4 +9,4 @@ const dataSource = new DataSource({
   database: process.env.DB_DATABASE,
 });
 
-module.exports = dataSource;
+module.exports = { dataSource };
