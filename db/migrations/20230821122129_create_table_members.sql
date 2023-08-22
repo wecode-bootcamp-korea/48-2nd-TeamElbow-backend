@@ -1,7 +1,7 @@
 -- migrate:up
 CREATE TABLE `members` (
   `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `member_id` varchar(50) NOT NULL,
+  `member_sign_in_id` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `name` varchar(50) NOT NULL,
   `phone_number` varchar(50) NOT NULL,

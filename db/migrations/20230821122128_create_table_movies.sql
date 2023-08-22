@@ -9,7 +9,7 @@ CREATE TABLE `movies` (
   `poster_image_url` VARCHAR(255) NOT NULL,
   `director_and_actor` JSON NOT NULL,
   `description` TEXT NOT NULL,
-  `booking_rate_percent` INT NOT NULL,
+  `booking_rate_percent` INT NOT NULL default 0,
   `release_date` DATE NOT NULL
 );
 
