@@ -405,4 +405,7 @@ zsdoc/data
 /tests/_output/*
 !/tests/_output/.gitkeep
 
+### dbmate ###
+schema.sql
+
 # End of https://www.toptal.com/developers/gitignore/api/vim,macos,node,linux,visualstudiocode,dotenv,webstorm,windows,zsh
