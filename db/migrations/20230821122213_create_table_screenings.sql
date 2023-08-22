@@ -1,7 +1,7 @@
 -- migrate:up
 CREATE TABLE `screenings` (
   `id` int PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `screegning_time` timestamp NOT NULL,
+  `screening_time` datetime NOT NULL,
   `theater_id` int NOT NULL,
   `movie_id` int NOT NULL,
   `audio_and_subtitle_id` INT NOT NULL,

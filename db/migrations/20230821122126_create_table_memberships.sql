@@ -1,7 +1,7 @@
 -- migrate:up
 CREATE TABLE `memberships` (
   `id` int PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `level_name` varchar(50) NOT NULL,
+  `membership_name` varchar(50) NOT NULL,
   `free_booking_coupon` int NOT NULL,
   `free_snack_coupon` int NOT NULL,
   `store_discount_coupon` int NOT NULL,
