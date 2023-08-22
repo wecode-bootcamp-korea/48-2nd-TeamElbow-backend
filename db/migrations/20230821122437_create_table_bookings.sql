@@ -6,7 +6,7 @@ CREATE TABLE `bookings` (
   `seat_id` int NOT NULL,
   `member_id` int NOT NULL,
   `screening_id` int NOT NULL,
-  `price` int NOT NULL,
+  `total_price` decimal(9,2) NOT NULL,
   FOREIGN KEY (seat_id) REFERENCES seats (id),
   FOREIGN KEY (member_id) REFERENCES members (id),
   FOREIGN KEY (screening_id) REFERENCES screenings (id)
