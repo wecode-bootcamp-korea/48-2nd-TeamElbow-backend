@@ -13,7 +13,7 @@ const hashPassword = async (memberPassword) => {
 
 const signUp = async ( memberId, memberPassword, memberName, memberPhonenumber, memberEmail, memberBirthday, memberGender ) => {
 
-    const member = await memberDao.getMemberByMemberId(memberId);
+    const member = await memberDao.getMemberById(memberId);
     console.log(member);
     if (member) {
         const err = new Error('duplicated member');
@@ -35,7 +35,7 @@ const signUp = async ( memberId, memberPassword, memberName, memberPhonenumber, 
 };
 
 const signIn = async (memberId, memberPassword) => {
-    const member = await memberDao.getMemberByMemberId(memberId);
+    const member = await memberDao.getMemberById(memberId);
     
     if(!member) {
         const err = new Error('INVALID_MEMBER');

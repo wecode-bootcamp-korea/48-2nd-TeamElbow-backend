@@ -27,16 +27,11 @@ const createMember = async (memberId, hashedPassword, memberName, memberPhonenum
     } catch (err) {
         const error = new Error('dataSource Error');
         error.statusCode = 400;
-
-        
-
-        //console.log('ERROR: ', err)
-
-        throw error;
+    throw error;
     }
 };
 
-const getMemberByMemberId = async (memberId) => {
+const getMemberById = async (memberId) => {
     const [member] = await dataSource.query(
             `
             SELECT
