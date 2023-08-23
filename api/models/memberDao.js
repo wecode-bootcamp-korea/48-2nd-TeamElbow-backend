@@ -27,9 +27,6 @@ const createMember = async (memberSignInId, hashedPassword, memberName, memberPh
     } catch (err) {
         const error = new Error('dataSource Error');
         error.statusCode = 400;
-
-        // console.log('ERROR: ', err)
-
         throw error;
     }
 };
