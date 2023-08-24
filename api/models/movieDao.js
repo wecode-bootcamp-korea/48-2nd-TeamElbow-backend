@@ -1,7 +1,86 @@
-const {dataSource} = require('./dataSource');
-//get 요청에 영화 정보 보내주는 기능
-//일정 시간마다 예매울 업데이트하는 기능
-//예매율은 현재 상영작 전체 기준, 만약 상영이 종료되거나 아직 미개봉 상태인 영화가 데이터에 들어간다면 movie table에 상영상태를 나타내는 칼럼도 필요
-const calculateBookingRate = async(movie.id) => {dataSource.query(
-  `SELECT `
-)}
+const { dataSource } = require("./dataSource");
+
+const calculateBookingRate = async (movieId) => {
+  const [allBookings] = await dataSource.query(
+    `SELECT 
+    COUNT(id) as denominator
+    FROM 
+    screenings_seats;`
+  );
+
+  const [specificBookings] = await dataSource.query(
+    `SELECT 
+      COUNT(movie_id) as numerator
+     FROM 
+      (SELECT 
+        ss.id, 
+        s.movie_id 
+        FROM screenings_seats ss 
+        LEFT JOIN screenings s 
+        ON ss.screening_id = s.id 
+        where movie_id = ?) t 
+     group by movie_id;`,
+    [movieId]
+  );
+  const bookingRatePercent = (specificBookings["numerator"] / allBookings["denominator"]) * 100;
+  return bookingRatePercent;
+};
+
+const recordBookingRate = async (movieId, bookingRatePercent) => {
+  await dataSource.query(
+    `UPDATE 
+      movies 
+     SET booking_rate_percent=?
+     WHERE id = ?;`,
+    [bookingRatePercent, movieId]
+  );
+};
+
+const getAllMovieId = async () => {
+  const allMovieIdJson = await dataSource.query(`SELECT id FROM movies;`);
+  const allMovieId = await allMovieIdJson.map((element) => element.id);
+  return allMovieId;
+};
+
+const getAllMoviesInformation = async (ordering) => {
+  const allMoviesInformation = await dataSource.query(
+    `SELECT
+      movie_title as movieTitle,
+      poster_image_url as moviePosterImageUrl,
+      release_date as movieReleaseDate,
+      booking_rate_percent as bookingRatePercent
+     From movies
+     ${ordering};
+      `
+  );
+  return allMoviesInformation;
+};
+
+const getSpecificMovieInformation = async (movieId) => {
+  const specificMovieInformation = await dataSource.query(
+    `SELECT
+      movie_title as movieTitle,
+      poster_image_url as moviePosterImageUrl,
+      release_date as movieReleaseDate,
+      booking_rate_percent as bookingRatePercent,
+      description as movieDescription,
+      running_time_minute as movieRunningTimeMinute,
+      minimum_watching_age as movieMinimumWatchingAge,
+      language as movieLanguage,
+      director as movieDirector,
+      actor as movieActor
+     From movies
+     WHERE id = ?;
+      `,
+    [movieId]
+  );
+  return specificMovieInformation;
+};
+
+module.exports = {
+  calculateBookingRate,
+  recordBookingRate,
+  getAllMoviesInformation,
+  getSpecificMovieInformation,
+  getAllMovieId,
+};
