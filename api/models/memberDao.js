@@ -1,10 +1,10 @@
-const dataSource = require('./dataSource');
+const {dataSource} = require('./dataSource');
 
-const createMember = async (memberId, hashedPassword, memberName, memberPhonenumber, memberEmail, memberBirthday, memberGender) => {
+const createMember = async (memberSignInId, hashedPassword, memberName, memberPhoneNumber, memberEmail, memberBirthday, memberGender) => {
     try {
         const result = await dataSource.query(
             `INSERT INTO members (
-                member_id,
+                member_sign_in_id,
                 password,
                 name,
                 phone_number,
@@ -19,38 +19,41 @@ const createMember = async (memberId, hashedPassword, memberName, memberPhonenum
                 ?,
                 ?,
                 ?
-            )
-            `,
-            [memberId, hashedPassword, memberName, memberPhonenumber, memberEmail, memberBirthday, memberGender]
+            );
+            `, 
+            [memberSignInId, hashedPassword, memberName, memberPhoneNumber, memberEmail, memberBirthday, memberGender]
         );
         return result;
     } catch (err) {
         const error = new Error('dataSource Error');
         error.statusCode = 400;
-    throw error;
+        throw error;
     }
 };
 
-const getMemberById = async (memberId) => {
+const getMemberByMemberId = async (memberSignInId) => {
     const [member] = await dataSource.query(
-            `
-            SELECT
-            member_id,
-            password,
-            name,
-            phone_number,
-            email,
-            birthday,
-            gender
-            FROM members
-            WHERE member_id = ?
-            `,
-            [memberId]
-        );
-        return member;
-    } ;
+        `
+        SELECT
+        id,
+        member_sign_in_id,
+        password,
+        name,
+        phone_number,
+        email,
+        birthday,
+        membership_id,
+        point,
+        gender
+        FROM members
+        WHERE member_sign_in_id = ?
+        `,
+        [memberSignInId]
+    );
+    return member;
+};
 
-module.exports = { 
+module.exports = {
     createMember,
     getMemberByMemberId
- };
+};

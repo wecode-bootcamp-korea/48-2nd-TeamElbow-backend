@@ -2,9 +2,10 @@ const memberService = require('../services/memberService');
 const { catchAsync } = require('../utils/error');
 
 const signUp = catchAsync(async (req, res) => {
-    const {memberId, memberPassword, memberName, memberPhonenumber, memberEmail, memberBirthday, memberGender} = req.body;
+    const {memberSignInId, memberPassword, memberName, memberPhoneNumber, memberEmail, memberBirthday, memberGender
+   } = req.body;
 
-    if ( !memberId || !memberPassword || !memberName || !memberPhonenumber || !memberEmail || !memberBirthday || !memberGender ) {
+    if ( !memberSignInId || !memberPassword || !memberName || !memberPhoneNumber || !memberEmail || !memberBirthday || !memberGender ) {
         const error = new Error('KEY_ERROR');
         error.statusCode = 400;
 
@@ -12,23 +13,24 @@ const signUp = catchAsync(async (req, res) => {
     }
 
     await memberService.signUp(
-        memberId,
+        memberSignInId,
         memberPassword,
         memberName,
-        memberPhonenumber,
+        memberPhoneNumber,
         memberEmail,
-        memberBirthday,
-        memberGender
+        memberBirthday,       
+        memberGender,
+
     );
 
     res.status(201).json("createMember");
 });
 
 const signIn = async (req, res) => {
-    const { memberId, memberPassword } = req.body;
+    const { memberSignInId, memberPassword } = req.body;
     
     try {
-    const accessToken = await memberService.signIn(memberId, memberPassword);
+    const accessToken = await memberService.signIn(memberSignInId, memberPassword);
 
         res.status(200).json({ accessToken: accessToken });
     } catch (error) {

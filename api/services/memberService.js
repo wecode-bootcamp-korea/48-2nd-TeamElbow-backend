@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const memberDao = require('../models/memberDao');
+const validator = require('../utils/validators');
 
 const hashPassword = async (memberPassword) => {
     const saltRounds = 10;
@@ -11,10 +12,22 @@ const hashPassword = async (memberPassword) => {
 
 
 
-const signUp = async ( memberId, memberPassword, memberName, memberPhonenumber, memberEmail, memberBirthday, memberGender ) => {
+const signUp = async ( 
+    memberSignInId,
+    memberPassword,
+    memberName,
+    memberPhoneNumber,
+    memberEmail,
+    memberBirthday,
+    memberGender ) => {
+    validator.validateMemberPassword(memberPassword);
+    validator.validateMemberEmail(memberEmail);
+    validator.validateMemberPhonenumber(memberPhoneNumber);
+    validator.validateMemberBirthday(memberBirthday);
+    validator.validateMemberGender(memberGender);
+    validator.validateMemberId(memberSignInId);
 
-    const member = await memberDao.getMemberById(memberId);
-    console.log(member);
+    const member = await memberDao.getMemberByMemberId(memberSignInId);
     if (member) {
         const err = new Error('duplicated member');
         err.statusCode = 400;
@@ -23,10 +36,10 @@ const signUp = async ( memberId, memberPassword, memberName, memberPhonenumber, 
 
     const hashedPassword = await hashPassword(memberPassword);
     const createMember = await memberDao.createMember(
-        memberId,
+        memberSignInId,
         hashedPassword,
         memberName,
-        memberPhonenumber,
+        memberPhoneNumber,
         memberEmail,
         memberBirthday,
         memberGender
@@ -34,8 +47,8 @@ const signUp = async ( memberId, memberPassword, memberName, memberPhonenumber, 
     return createMember;
 };
 
-const signIn = async (memberId, memberPassword) => {
-    const member = await memberDao.getMemberById(memberId);
+const signIn = async (memberSignInId, memberPassword) => {
+    const member = await memberDao.getMemberByMemberId(memberSignInId);
     
     if(!member) {
         const err = new Error('INVALID_MEMBER');
