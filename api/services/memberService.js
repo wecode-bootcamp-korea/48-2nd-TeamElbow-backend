@@ -2,9 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const memberDao = require('../models/memberDao');
-const { validateMemberId, validateMemberPassword, validateMemberEmail,
-    validateMemberPhonenumber,validateMemberBirthday, validateMemberGender
- } = require('../utils/validators')
+const validator = require('../utils/validators');
 
 const hashPassword = async (memberPassword) => {
     const saltRounds = 10;
@@ -22,16 +20,14 @@ const signUp = async (
     memberEmail,
     memberBirthday,
     memberGender ) => {
-    validateMemberPassword(memberPassword);
-    validateMemberEmail(memberEmail);
-    validateMemberPhonenumber(memberPhoneNumber);
-    validateMemberBirthday(memberBirthday);
-    validateMemberGender(memberGender);
-    validateMemberId(memberSignInId);
-
+    validator.validateMemberPassword(memberPassword);
+    validator.validateMemberEmail(memberEmail);
+    validator.validateMemberPhonenumber(memberPhoneNumber);
+    validator.validateMemberBirthday(memberBirthday);
+    validator.validateMemberGender(memberGender);
+    validator.validateMemberId(memberSignInId);
 
     const member = await memberDao.getMemberByMemberId(memberSignInId);
-    console.log(member);
     if (member) {
         const err = new Error('duplicated member');
         err.statusCode = 400;
