@@ -6,6 +6,7 @@ const morgan = require("morgan");
 
 const { router } = require("./api/routes");
 const { dataSource } = require("./api/models/dataSource");
+const { globalErrorHandler } = require("./api/utils/error");
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(cors());
 app.use(morgan("combined"));
 app.use(express.json());
 app.use(router);
+app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 8000;
 

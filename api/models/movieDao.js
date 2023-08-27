@@ -1,15 +1,16 @@
 const { dataSource } = require("./dataSource");
 
 const calculateBookingRate = async (movieId) => {
-  const [allBookings] = await dataSource.query(
-    `SELECT 
+  try {
+    const [allBookings] = await dataSource.query(
+      `SELECT 
     COUNT(id) as denominator
     FROM 
     screenings_seats;`
-  );
+    );
 
-  const [specificBookings] = await dataSource.query(
-    `SELECT 
+    const [specificBookings] = await dataSource.query(
+      `SELECT 
       COUNT(movie_id) as numerator
      FROM 
       (SELECT 
@@ -20,31 +21,56 @@ const calculateBookingRate = async (movieId) => {
         ON ss.screening_id = s.id 
         where movie_id = ?) t 
      group by movie_id;`,
-    [movieId]
-  );
-  const bookingRatePercent = (specificBookings["numerator"] / allBookings["denominator"]) * 100;
-  return bookingRatePercent;
+      [movieId]
+    );
+    const bookingRatePercent = (specificBookings["numerator"] / allBookings["denominator"]) * 100;
+    return bookingRatePercent;
+  } catch (err) {
+    console.log(err);
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
 };
 
 const recordBookingRate = async (movieId, bookingRatePercent) => {
-  await dataSource.query(
-    `UPDATE 
+  try {
+    await dataSource.query(
+      `UPDATE 
       movies 
      SET booking_rate_percent=?
      WHERE id = ?;`,
-    [bookingRatePercent, movieId]
-  );
+      [bookingRatePercent, movieId]
+    );
+  } catch (err) {
+    console.log(err);
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
 };
 
 const getAllMovieId = async () => {
-  const allMovieIdJson = await dataSource.query(`SELECT id FROM movies;`);
-  const allMovieId = await allMovieIdJson.map((element) => element.id);
-  return allMovieId;
+  try {
+    const allMovieIdJson = await dataSource.query(`SELECT id FROM movies;`);
+    const allMovieId = await allMovieIdJson.map((element) => element.id);
+    return allMovieId;
+  } catch (err) {
+    console.log(err);
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
 };
 
 const getAllMoviesInformation = async (ordering) => {
-  const allMoviesInformation = await dataSource.query(
-    `SELECT
+  try {
+    const allMoviesInformation = await dataSource.query(
+      `SELECT
+      id,
       movie_title as movieTitle,
       poster_image_url as moviePosterImageUrl,
       release_date as movieReleaseDate,
@@ -52,13 +78,22 @@ const getAllMoviesInformation = async (ordering) => {
      From movies
      ${ordering};
       `
-  );
-  return allMoviesInformation;
+    );
+    return allMoviesInformation;
+  } catch (err) {
+    console.log(err);
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
 };
 
 const getSpecificMovieInformation = async (movieId) => {
-  const specificMovieInformation = await dataSource.query(
-    `SELECT
+  try {
+    const specificMovieInformation = await dataSource.query(
+      `SELECT
+      id,
       movie_title as movieTitle,
       poster_image_url as moviePosterImageUrl,
       release_date as movieReleaseDate,
@@ -72,9 +107,16 @@ const getSpecificMovieInformation = async (movieId) => {
      From movies
      WHERE id = ?;
       `,
-    [movieId]
-  );
-  return specificMovieInformation;
+      [movieId]
+    );
+    return specificMovieInformation;
+  } catch (err) {
+    console.log(err);
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
 };
 
 module.exports = {
