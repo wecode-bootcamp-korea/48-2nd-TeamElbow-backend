@@ -1,5 +1,5 @@
-const memberService = require("../services/memberService");
-const { catchAsync } = require("../utils/error");
+const memberService = require('../services/memberService');
+const { catchAsync } = require('../utils/error');
 
 const signUp = catchAsync(async (req, res) => {
   const {
@@ -21,7 +21,7 @@ const signUp = catchAsync(async (req, res) => {
     !memberBirthday ||
     !memberGender
   ) {
-    const error = new Error("KEY_ERROR");
+    const error = new Error('KEY_ERROR');
     error.statusCode = 400;
 
     throw error;
@@ -37,7 +37,7 @@ const signUp = catchAsync(async (req, res) => {
     memberGender
   );
 
-  res.status(201).json("createMember");
+  res.status(201).json('createMember');
 });
 
 const signIn = async (req, res) => {

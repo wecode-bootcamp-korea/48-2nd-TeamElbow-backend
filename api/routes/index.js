@@ -1,9 +1,10 @@
-const express = require("express");
-const router = express.Router();
-const { memberRouter } = require("./memberRouter");
-const { movieRouter } = require("./movieRouter");
+const express = require('express');
+const { memberRouter } = require('./memberRouter');
+const { movieRouter } = require('./movieRouter');
 
-router.use("/member", memberRouter);
-router.use("/movies", movieRouter);
+const router = express.Router();
+
+router.use('/member', memberRouter);
+router.use('/movies', movieRouter);
 
 module.exports = { router };

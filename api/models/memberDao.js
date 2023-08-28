@@ -1,4 +1,4 @@
-const { dataSource } = require("./dataSource");
+const { dataSource } = require('./dataSource');
 
 const createMember = async (
   memberSignInId,
@@ -41,7 +41,7 @@ const createMember = async (
     );
     return result;
   } catch (err) {
-    const error = new Error("dataSource Error");
+    const error = new Error('dataSource Error');
     error.statusCode = 400;
     throw error;
   }
