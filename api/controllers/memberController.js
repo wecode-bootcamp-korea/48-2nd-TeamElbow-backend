@@ -1,58 +1,78 @@
-const memberService = require('../services/memberService');
-const { catchAsync } = require('../utils/error');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-const signUp = catchAsync(async (req, res) => {
-  const {
+const memberDao = require('../models/memberDao');
+const validator = require('../utils/validators');
+
+const hashPassword = async (memberPassword) => {
+    const saltRounds = 10;
+
+    return await bcrypt.hash(memberPassword, saltRounds);
+};
+
+
+
+const signUp = async ( 
     memberSignInId,
     memberPassword,
     memberName,
     memberPhoneNumber,
     memberEmail,
     memberBirthday,
-    memberGender,
-  } = req.body;
+    memberGender ) => {
+    validator.validateMemberPassword(memberPassword);
+    validator.validateMemberEmail(memberEmail);
+    validator.validateMemberPhonenumber(memberPhoneNumber);
+    validator.validateMemberBirthday(memberBirthday);
+    validator.validateMemberGender(memberGender);
+    validator.validateMemberId(memberSignInId);
 
-  if (
-    !memberSignInId ||
-    !memberPassword ||
-    !memberName ||
-    !memberPhoneNumber ||
-    !memberEmail ||
-    !memberBirthday ||
-    !memberGender
-  ) {
-    const error = new Error('KEY_ERROR');
-    error.statusCode = 400;
+    const member = await memberDao.getMemberByMemberId(memberSignInId);
+    if (member) {
+        const err = new Error('duplicated member');
+        err.statusCode = 400;
+        throw err;
+    }
 
-    throw error;
-  }
+    const hashedPassword = await hashPassword(memberPassword);
+    const createMember = await memberDao.createMember(
+        memberSignInId,
+        hashedPassword,
+        memberName,
+        memberPhoneNumber,
+        memberEmail,
+        memberBirthday,
+        memberGender
+    );
+    return createMember;
+};
 
-  await memberService.signUp(
-    memberSignInId,
-    memberPassword,
-    memberName,
-    memberPhoneNumber,
-    memberEmail,
-    memberBirthday,
-    memberGender
-  );
+const signIn = async (memberSignInId, memberPassword) => {
+    const member = await memberDao.getMemberByMemberId(memberSignInId);
+    
+    if(!member) {
+        const err = new Error('INVALID_MEMBER');
+        err.statusCode = 401;
 
-  res.status(201).json('createMember');
-});
+        throw err;
+    };
+    
+    const isMatched = await bcrypt.compare(memberPassword, member.password);
+    
+    if (!isMatched) {
+        const err = new Error('INVALID_MEMBER');
+        err.statusCode = 401;
 
-const signIn = async (req, res) => {
-  const { memberSignInId, memberPassword } = req.body;
+        throw err;
+    };
 
-  try {
-    const accessToken = await memberService.signIn(memberSignInId, memberPassword);
-
-    res.status(200).json({ accessToken: accessToken });
-  } catch (error) {
-    res.status(error.statusCode || 401).json({ messege: error.message });
-  }
+    const accessToken = jwt.sign({ id: member.id }, process.env.JWT_SECRET, 
+        {algorithm: process.env.JWT_ALGORITHM, expiresIn: process.env.JWT_EXPIRE_IN}
+    );
+    return accessToken;
 };
 
 module.exports = {
-  signUp,
-  signIn,
+    signUp,
+    signIn
 };

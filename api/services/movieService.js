@@ -20,11 +20,11 @@ const getAllMoviesInformation = async (req) => {
   const ordering = async (sortBy) => {
     switch (sortBy) {
       case "bookingRate":
-        return `ORDER BY bookingRatePercent`;
+        return `ORDER BY -bookingRatePercent`;
       case "alphabet":
         return `ORDER BY movieTitle`;
       default:
-        return `ORDER BY bookingRatePercent`;
+        return `ORDER BY -bookingRatePercent`;
     }
   };
 
