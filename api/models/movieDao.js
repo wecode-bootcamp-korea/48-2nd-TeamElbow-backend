@@ -1,71 +1,5 @@
 const { dataSource } = require("./dataSource");
 
-const calculateBookingRate = async (movieId) => {
-  try {
-    const [allBookings] = await dataSource.query(
-      `SELECT 
-    COUNT(id) as denominator
-    FROM 
-    screenings_seats;`
-    );
-
-    const [specificBookings] = await dataSource.query(
-      `SELECT 
-      COUNT(movie_id) as numerator
-     FROM 
-      (SELECT 
-        ss.id, 
-        s.movie_id 
-        FROM screenings_seats ss 
-        LEFT JOIN screenings s 
-        ON ss.screening_id = s.id 
-        where movie_id = ?) t 
-     group by movie_id;`,
-      [movieId]
-    );
-    const bookingRatePercent = (specificBookings["numerator"] / allBookings["denominator"]) * 100;
-    return bookingRatePercent;
-  } catch (err) {
-    console.log(err);
-    const error = new Error("dataSource Error");
-    error.statusCode = 400;
-
-    throw error;
-  }
-};
-
-const recordBookingRate = async (movieId, bookingRatePercent) => {
-  try {
-    await dataSource.query(
-      `UPDATE 
-      movies 
-     SET booking_rate_percent=?
-     WHERE id = ?;`,
-      [bookingRatePercent, movieId]
-    );
-  } catch (err) {
-    console.log(err);
-    const error = new Error("dataSource Error");
-    error.statusCode = 400;
-
-    throw error;
-  }
-};
-
-const getAllMovieId = async () => {
-  try {
-    const allMovieIdJson = await dataSource.query(`SELECT id FROM movies;`);
-    const allMovieId = await allMovieIdJson.map((element) => element.id);
-    return allMovieId;
-  } catch (err) {
-    console.log(err);
-    const error = new Error("dataSource Error");
-    error.statusCode = 400;
-
-    throw error;
-  }
-};
-
 const getAllMoviesInformation = async (ordering) => {
   try {
     const allMoviesInformation = await dataSource.query(
@@ -120,9 +54,6 @@ const getSpecificMovieInformation = async (movieId) => {
 };
 
 module.exports = {
-  calculateBookingRate,
-  recordBookingRate,
   getAllMoviesInformation,
   getSpecificMovieInformation,
-  getAllMovieId,
 };
