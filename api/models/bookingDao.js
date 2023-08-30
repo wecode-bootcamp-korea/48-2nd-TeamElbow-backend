@@ -1,8 +1,9 @@
 const { dataSource } = require("./dataSource");
 
 const getSeatsInformation = (screeningId) => {
-  const seatsInformation = dataSource.query(
-    `SELECT 
+  try {
+    const seatsInformation = dataSource.query(
+      `SELECT 
       s.id AS seatId, 
       st.type_name AS seatType,
       CASE WHEN 
@@ -16,105 +17,215 @@ const getSeatsInformation = (screeningId) => {
      ON b.id = bs.booking_id 
      INNER JOIN seat_types st 
      ON st.id=s.seat_type_id 
-     WHERE screening_id = 1 
+     WHERE screening_id = ? 
      OR screening_id is null 
      AND theater_id = (
       SELECT 
       theater_id 
       FROM screenings 
-      WHERE id = 1
+      WHERE id = ?
      );`,
-    [screeningId, screeningId]
-  );
-  return seatsInformation;
+      [screeningId, screeningId]
+    );
+    return seatsInformation;
+  } catch {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
 };
 
 const getMovieInformationInSeatsSelection = (screeningId) => {
-  const movieInforamtionInSeatsSelection = dataSource.query(
-    `SELECT
-      s.movie_title AS movieTitle
-      s.screening_time AS screeningTime,
+  try {
+    const movieInforamtionInSeatsSelection = dataSource.query(
+      `SELECT
+      m.movie_title AS movieTitle,
+      DATE_FORMAT(s.screening_time, '%Y.%m.%d(%a)') AS screeningDate,
+      CONCAT(
+        TIME_FORMAT(
+          s.screening_time, 
+          '%H:%i'
+        )
+        ,'-'
+        ,TIME_FORMAT(
+          ADDTIME(
+            s.screening_time, 
+            SEC_TO_TIME(m.running_time_minute * 60)
+            ),
+          '%H:%i'
+         )
+      ) AS screeningTime,
       m.poster_image_url AS moviePosterImageUrl,
       m.minimum_watching_age AS minimumWatchingAge,
-      m.poset_image_url AS moviePosterImageUrl,
-      m.running_time_minute AS runningTime
-     From screenings s
+      m.poster_image_url AS moviePosterImageUrl
+     FROM screenings s
      INNER JOIN movies m
-     ON s.movie_id = m.id;
+     ON s.movie_id = m.id
      WHERE s.id = ?
       ;`,
-    [screeningId]
-  );
+      [screeningId]
+    );
 
-  return movieInforamtionInSeatsSelection;
+    return movieInforamtionInSeatsSelection;
+  } catch {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
 };
 
-const getScreeningTypeIdByScreeningId = (screeningId) => {
-  const [screeningType] = dataSource.query(
-    `SELECT screening_type_id 
+const getAudienceTypeIdByAudienceType = async (audienceType) => {
+  try {
+    const [getAudienceTypeId] = await dataSource.query(
+      `SELECT id AS audienceTypeId
+     FROM audience_types
+     WHERE type_name = ?
+     ;`,
+      [audienceType]
+    );
+    const { audienceTypeId } = getAudienceTypeId;
+    return audienceTypeId;
+  } catch {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const getScreeningTypeIdByScreeningId = async (screeningId) => {
+  try {
+    const [getScreeningTypeId] = await dataSource.query(
+      `SELECT screening_type_id AS screeningTypeId
      FROM screenings 
      WHERE id = ?
      ; `,
-    [screeningId]
-  );
+      [screeningId]
+    );
+    const { screeningTypeId } = getScreeningTypeId;
+    return screeningTypeId;
+  } catch {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
 
-  return screeningType;
+    throw error;
+  }
 };
 
-const getIsEarlybirdByScreeningId = (screeningId) => {
-  const [isEarlybird] = dataSource.query(
-    `SELECT
+const getIsEarlybirdByScreeningId = async (screeningId) => {
+  try {
+    const [getIsEarlybird] = await dataSource.query(
+      `SELECT
      CASE WHEN HOUR(screening_time) < 10 AND HOUR(screening_time) > 6
      THEN TRUE 
      ELSE FALSE 
-     END AS isEarlyBird
+     END AS isEarlybird
      FROM screenings
      WHERE id = ?
      ; `,
-    [screeningId]
-  );
+      [screeningId]
+    );
+    const { isEarlybird } = getIsEarlybird;
+    return isEarlybird;
+  } catch {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
 
-  return isEarlybird;
+    throw error;
+  }
 };
 
-const getSeatTypIdeBySeatId = (seatId) => {
-  const [seatTypeId] = dataSource.query(
-    `SELECT
-     seat_type_id
+const getSeatTypIdeBySeatId = async (seatId) => {
+  try {
+    const [getSeatTypeId] = await dataSource.query(
+      `SELECT
+     seat_type_id AS seatTypeId
      FROM seats
      WHERE id = ?
      ;`,
-    [seatId]
-  );
+      [seatId]
+    );
+    const { seatTypeId } = getSeatTypeId;
+    return seatTypeId;
+  } catch {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
 
-  return seatTypeId;
+    throw error;
+  }
 };
 
-const getSeatPrice = (
-  audienceTypeId,
-  screeningTypeId,
-  isEarlybird,
-  seatTypeId
-) => {
-  const [seatPrice] = dataSource.query(
-    `SELECT 
-      pirce AS ticketPrice 
-     FROM ticket_pirces 
-     WHERE audience_type_id = ? 
-     AND scrrening_type_id = ?, 
+const getSeatPrice = async (audienceTypeId, screeningTypeId, isEarlybird, seatTypeId) => {
+  try {
+    const [getSeatPrice] = await dataSource.query(
+      `SELECT 
+      price AS seatPrice 
+     FROM ticket_prices 
+     WHERE audience_type_id = ?
+     AND screening_type_id = ? 
      AND is_earlybird = ? 
      AND seat_type_id = ? ;`,
-    [audienceTypeId, screeningTypeId, isEarlybird, seatTypeId]
-  );
+      [audienceTypeId, screeningTypeId, isEarlybird, seatTypeId]
+    );
+    const { seatPrice } = await getSeatPrice;
+    return Number(seatPrice);
+  } catch {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
 
-  return seatPrice;
+    throw error;
+  }
+};
+
+const getSeatsInformation2 = async (screeningId) => {
+  try {
+    const seatsInformation = await dataSource.query(
+      `SELECT 
+      s.seat_row AS seatRow,
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'seatId', s.id,
+          'seatColumn', s.seat_column, 
+          'seatType', st.type_name, 
+          'isSeatBooked', CASE WHEN b.id IS NULL THEN 'false' ELSE 'true' END
+          )
+        ) AS seats
+     FROM seats s 
+     LEFT JOIN bookings_seats bs 
+     ON bs.seat_id = s.id 
+     LEFT JOIN bookings b 
+     ON b.id = bs.booking_id 
+     INNER JOIN seat_types st 
+     ON st.id=s.seat_type_id 
+     WHERE screening_id = ? 
+     OR screening_id is null 
+     AND theater_id = (
+      SELECT 
+      theater_id 
+      FROM screenings 
+      WHERE id = ?)
+      GROUP BY s.seat_row
+     ;`,
+      [screeningId, screeningId]
+    );
+    return seatsInformation;
+  } catch {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
 };
 
 module.exports = {
   getSeatsInformation,
   getMovieInformationInSeatsSelection,
+  getAudienceTypeIdByAudienceType,
   getScreeningTypeIdByScreeningId,
   getIsEarlybirdByScreeningId,
   getSeatTypIdeBySeatId,
   getSeatPrice,
+  getSeatsInformation2,
 };
