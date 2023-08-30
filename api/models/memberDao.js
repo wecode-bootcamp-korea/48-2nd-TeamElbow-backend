@@ -1,5 +1,4 @@
 const {dataSource} = require('./dataSource');
-
 const createMember = async (memberSignInId, hashedPassword, memberName, memberPhoneNumber, memberEmail, memberBirthday, memberGender) => {
     try {
         const result = await dataSource.query(
@@ -20,7 +19,7 @@ const createMember = async (memberSignInId, hashedPassword, memberName, memberPh
                 ?,
                 ?
             );
-            `, 
+            `,
             [memberSignInId, hashedPassword, memberName, memberPhoneNumber, memberEmail, memberBirthday, memberGender]
         );
         return result;
@@ -30,8 +29,7 @@ const createMember = async (memberSignInId, hashedPassword, memberName, memberPh
         throw error;
     }
 };
-
-const getMemberByMemberId = async (memberSignInId) => {
+const getMemberByMemberId = async (memberId) => {
     const [member] = await dataSource.query(
         `
         SELECT
@@ -46,13 +44,12 @@ const getMemberByMemberId = async (memberSignInId) => {
         point,
         gender
         FROM members
-        WHERE member_sign_in_id = ?
+        WHERE id = ?
         `,
-        [memberSignInId]
+        [memberId]
     );
     return member;
 };
-
 module.exports = {
     createMember,
     getMemberByMemberId
