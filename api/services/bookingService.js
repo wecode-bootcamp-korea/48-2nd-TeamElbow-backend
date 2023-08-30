@@ -1,7 +1,7 @@
 const bookingDao = require("../models/bookingDao");
 
 const getSeatsInformation = async (screeningId) => {
-  const seatsInformation = await bookingDao.getSeatsInformation2(screeningId);
+  const seatsInformation = await bookingDao.getSeatsInformation(screeningId);
   return seatsInformation;
 };
 

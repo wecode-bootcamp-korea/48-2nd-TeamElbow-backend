@@ -1,15 +1,18 @@
 const { dataSource } = require("./dataSource");
 
-const getSeatsInformation = (screeningId) => {
+const getSeatsInformation = async (screeningId) => {
   try {
-    const seatsInformation = dataSource.query(
+    const seatsInformation = await dataSource.query(
       `SELECT 
-      s.id AS seatId, 
-      st.type_name AS seatType,
-      CASE WHEN 
-        b.id IS NULL THEN 'notBooked' 
-        ELSE 'booked' 
-        END AS seatIsBooked
+      s.seat_row AS seatRow,
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'seatId', s.id,
+          'seatColumn', s.seat_column, 
+          'seatType', st.type_name, 
+          'isSeatBooked', CASE WHEN b.id IS NULL THEN 'false' ELSE 'true' END
+          )
+        ) AS seats
      FROM seats s 
      LEFT JOIN bookings_seats bs 
      ON bs.seat_id = s.id 
@@ -23,8 +26,9 @@ const getSeatsInformation = (screeningId) => {
       SELECT 
       theater_id 
       FROM screenings 
-      WHERE id = ?
-     );`,
+      WHERE id = ?)
+      GROUP BY s.seat_row
+     ;`,
       [screeningId, screeningId]
     );
     return seatsInformation;
@@ -179,46 +183,6 @@ const getSeatPrice = async (audienceTypeId, screeningTypeId, isEarlybird, seatTy
   }
 };
 
-const getSeatsInformation2 = async (screeningId) => {
-  try {
-    const seatsInformation = await dataSource.query(
-      `SELECT 
-      s.seat_row AS seatRow,
-      JSON_ARRAYAGG(
-        JSON_OBJECT(
-          'seatId', s.id,
-          'seatColumn', s.seat_column, 
-          'seatType', st.type_name, 
-          'isSeatBooked', CASE WHEN b.id IS NULL THEN 'false' ELSE 'true' END
-          )
-        ) AS seats
-     FROM seats s 
-     LEFT JOIN bookings_seats bs 
-     ON bs.seat_id = s.id 
-     LEFT JOIN bookings b 
-     ON b.id = bs.booking_id 
-     INNER JOIN seat_types st 
-     ON st.id=s.seat_type_id 
-     WHERE screening_id = ? 
-     OR screening_id is null 
-     AND theater_id = (
-      SELECT 
-      theater_id 
-      FROM screenings 
-      WHERE id = ?)
-      GROUP BY s.seat_row
-     ;`,
-      [screeningId, screeningId]
-    );
-    return seatsInformation;
-  } catch {
-    const error = new Error("dataSource Error");
-    error.statusCode = 400;
-
-    throw error;
-  }
-};
-
 module.exports = {
   getSeatsInformation,
   getMovieInformationInSeatsSelection,
@@ -227,5 +191,4 @@ module.exports = {
   getIsEarlybirdByScreeningId,
   getSeatTypIdeBySeatId,
   getSeatPrice,
-  getSeatsInformation2,
 };
