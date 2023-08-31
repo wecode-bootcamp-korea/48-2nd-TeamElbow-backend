@@ -23,7 +23,7 @@ const signUp = catchAsync(async (req, res) => {
 
     );
 
-    res.status(201).json("createMember");
+    res.status(201).json({message:"createMember"});
 });
 
 const signIn = async (req, res) => {
