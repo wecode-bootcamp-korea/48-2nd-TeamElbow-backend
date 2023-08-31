@@ -14,7 +14,7 @@ const loginRequired = async (req, res, next) => {
 
     const payload = await jwt.verify(accessToken, process.env.JWT_SECRET);
 
-    const member = await memberService.getMemberByMemberId(payload.id);
+    const member = await memberService.getMemberByMemberId(payload['member_sign_in_id']);
 
     if (!member) {
       const error = new Error("USER_DOES_NOT_EXIST");
