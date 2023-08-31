@@ -7,7 +7,7 @@ const getAllMoviesInformation = async (ordering) => {
       id,
       movie_title as movieTitle,
       poster_image_url as moviePosterImageUrl,
-      release_date as movieReleaseDate,
+      DATE_FORMAT(release_date , '%Y-%m-%d') AS movieReleaseDate,
       booking_rate_percent as bookingRatePercent
      From movies
      ${ordering};
