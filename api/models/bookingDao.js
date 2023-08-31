@@ -123,8 +123,8 @@ const getIsEarlybirdByScreeningId = async (screeningId) => {
     const [getIsEarlybird] = await dataSource.query(
       `SELECT
      CASE WHEN HOUR(screening_time) < 10 AND HOUR(screening_time) > 6
-     THEN TRUE 
-     ELSE FALSE 
+     THEN 'TRUE' 
+     ELSE 'FALSE' 
      END AS isEarlybird
      FROM screenings
      WHERE id = ?

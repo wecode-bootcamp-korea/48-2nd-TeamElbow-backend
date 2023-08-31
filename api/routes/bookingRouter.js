@@ -5,6 +5,6 @@ const bookingRouter = express.Router();
 
 bookingRouter.get("/seatsInformation", bookingController.getSeatsInformation);
 bookingRouter.get("/movieInformation", bookingController.getMovieInformationInSeatsSelection);
-bookingRouter.get("/ticketPrice", bookingController.getTicketPrice);
+bookingRouter.get("/ticketPrice", bookingController.getIsEarlybird);
 
 module.exports = { bookingRouter };

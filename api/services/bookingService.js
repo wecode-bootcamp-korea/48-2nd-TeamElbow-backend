@@ -5,27 +5,28 @@ const getSeatsInformation = async (screeningId) => {
   return seatsInformation;
 };
 
+const weekDay = {
+  Mon: "월",
+  Tue: "화",
+  Wed: "수",
+  Thu: "목",
+  Fri: "금",
+  Sat: "토",
+  Sun: "일",
+};
+
+const translateWeekDay = async (date) => {
+  const shortenedDay = await date.substring(11, 14);
+  console.log(shortenedDay);
+  const translatedWeekdDay = (await weekDay[shortenedDay]) || shortenedDay;
+  return await date.replace(date.substring(11, 14), translatedWeekdDay);
+};
+
 const getMovieInformationInSeatsSelection = async (screeningId) => {
   const [movieInforamtionInSeatsSelection] = await bookingDao.getMovieInformationInSeatsSelection(screeningId);
   const { screeningDate } = movieInforamtionInSeatsSelection;
-  const translateWeekday = async (screeningDate) => {
-    if (screeningDate.includes("Mon")) {
-      movieInforamtionInSeatsSelection.screeningDate = await screeningDate.replace("Mon", "월");
-    } else if (screeningDate.includes("Tue")) {
-      movieInforamtionInSeatsSelection.screeningDate = await screeningDate.replace("Tue", "화");
-    } else if (screeningDate.includes("Wed")) {
-      movieInforamtionInSeatsSelection.screeningDate = await screeningDate.replace("Wed", "수");
-    } else if (screeningDate.includes("Thu")) {
-      movieInforamtionInSeatsSelection.screeningDate = await screeningDate.replace("Thu", "목");
-    } else if (screeningDate.includes("Fri")) {
-      movieInforamtionInSeatsSelection.screeningDate = await screeningDate.replace("Fri", "금");
-    } else if (screeningDate.includes("Sat")) {
-      movieInforamtionInSeatsSelection.screeningDate = await screeningDate.replace("Sat", "토");
-    } else if (screeningDate.includes("Sun")) {
-      movieInforamtionInSeatsSelection.screeningDate = await screeningDate.replace("Sun", "일");
-    }
-  };
-  await translateWeekday(screeningDate);
+  movieInforamtionInSeatsSelection.screeningDate = await translateWeekDay(screeningDate);
+  console.log(movieInforamtionInSeatsSelection);
   return movieInforamtionInSeatsSelection;
 };
 
@@ -37,6 +38,12 @@ const getSeatPrice = async (screeningId, seatId, audienceType) => {
   const seatPrice = await bookingDao.getSeatPrice(audienceTypeId, screeningTypeId, isEarlyBird, seatTypeId);
 
   return seatPrice;
+};
+
+const getIsEalrybirdByscreeningId = async (screeningId) => {
+  const isEarlyBird = await bookingDao.getIsEarlybirdByScreeningId(screeningId);
+
+  return isEarlyBird;
 };
 
 const getTotalPrice = async (screeningId, seatId, audienceType) => {
@@ -58,4 +65,5 @@ module.exports = {
   getMovieInformationInSeatsSelection,
   getSeatPrice,
   getTotalPrice,
+  getIsEalrybirdByscreeningId,
 };

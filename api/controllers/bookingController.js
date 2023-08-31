@@ -13,10 +13,10 @@ const getMovieInformationInSeatsSelection = catchAsync(async (req, res) => {
   await res.json(movieInformation);
 });
 
-const getTicketPrice = catchAsync(async (req, res) => {
-  const { screeningId, seatId, audienceType } = await req.query;
-  const ticketPrice = await bookingService.getTotalPrice(screeningId, seatId, audienceType);
-  await res.json(ticketPrice);
+const getIsEarlybird = catchAsync(async (req, res) => {
+  const { screeningId } = await req.query;
+  const isEarlyBird = await bookingService.getIsEalrybirdByscreeningId(screeningId);
+  await res.json(isEarlyBird);
 });
 
-module.exports = { getSeatsInformation, getMovieInformationInSeatsSelection, getTicketPrice };
+module.exports = { getSeatsInformation, getMovieInformationInSeatsSelection, getIsEarlybird };
