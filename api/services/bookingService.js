@@ -17,7 +17,6 @@ const weekDay = {
 
 const translateWeekDay = async (date) => {
   const shortenedDay = await date.substring(11, 14);
-  console.log(shortenedDay);
   const translatedWeekdDay = (await weekDay[shortenedDay]) || shortenedDay;
   return await date.replace(date.substring(11, 14), translatedWeekdDay);
 };
@@ -26,7 +25,6 @@ const getMovieInformationInSeatsSelection = async (screeningId) => {
   const [movieInforamtionInSeatsSelection] = await bookingDao.getMovieInformationInSeatsSelection(screeningId);
   const { screeningDate } = movieInforamtionInSeatsSelection;
   movieInforamtionInSeatsSelection.screeningDate = await translateWeekDay(screeningDate);
-  console.log(movieInforamtionInSeatsSelection);
   return movieInforamtionInSeatsSelection;
 };
 
@@ -47,17 +45,12 @@ const getIsEalrybirdByscreeningId = async (screeningId) => {
 };
 
 const getTotalPrice = async (screeningId, seatId, audienceType) => {
-  if (Array.isArray(seatId)) {
-    let totalPrice = 0;
-    for (let i = 0; i < seatId.length; i++) {
-      const price = await getSeatPrice(screeningId, seatId[i], audienceType[i]);
-      totalPrice = totalPrice + price;
-    }
-    return totalPrice;
-  } else {
-    const totalPrice = await getSeatPrice(screeningId, seatId, audienceType);
-    return totalPrice;
-  }
+  const seatIds = Array.isArray(seatId) ? seatId : [seatId];
+  const audienceTypes = Array.isArray(audienceType) ? audienceType : [audienceType];
+
+  const prices = await Promise.all(seatIds.map((id, index) => getSeatPrice(screeningId, id, audienceTypes[index])));
+
+  return prices.reduce((total, price) => total + price, 0);
 };
 
 module.exports = {
