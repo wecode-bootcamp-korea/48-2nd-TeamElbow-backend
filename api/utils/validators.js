@@ -1,5 +1,5 @@
-const validateMemberId = (memberId) => {
-    if (!/^[a-zA-Z0-9]{6,}$/.test(memberId)) {
+const validateMemberId = (memberSignInId) => {
+    if (!/^[a-zA-Z0-9]{6,}$/.test(memberSignInId)) {
       const error = new Error('Invalid memberId');
       error.statusCode = 400;
       throw error;
