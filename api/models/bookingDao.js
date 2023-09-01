@@ -1,54 +1,87 @@
 const { dataSource } = require("./dataSource");
 
-// const getTicketPricesForScreening = async (screeningId) => {
-//     const ticketPrices = await dataSource.query(
-//       `
-//       SELECT prices, seat_type_id
-//       FROM ticket_prices
-//       WHERE screening_type_id = (
-//         SELECT screening_type_id
-//         FROM screenings
-//         WHERE id = ?
-//       )
-//       `, [screeningId]);
-//       return ticketPrices;
-//   }
-  
-  const createBooking = async (memberId, screeningId, seatIds, totalPrice) => {
-    const bookingNumber = memberId.toString()+screeningId.toString()+seatIds.toString()
-    const bookingResult = await dataSource.query(
-      `
-      INSERT INTO bookings (member_id, screening_id, total_price, booking_number)
-      VALUES (?, ?, ?, ?);
-      `, [memberId, screeningId, totalPrice, bookingNumber]);
-  
-    const bookingId = bookingResult.insetId;
-  
-    for (const seatId of seatIds) {
-      await dataSource.query(
-        `
-        INSERT INTO bookings_seats (booking_id, seat_id)
-        VALUES (?, ?);
-        `, [bookingId, seatId]);
-    }
-  
-    return bookingId;
+  const alterBooking = async (bookingId) => {
+   await dataSource.query(
+    `UPDATE bookings
+    SET status = 'confirmed'
+    WHERE id = ?;`,
+    [bookingId]
+    );
   }
+
+  const alterBookingSeats = async (bookingId) => {
+    await dataSource.query(
+     `UPDATE bookings_seats
+     SET status = 'confirmed'
+     WHERE booking_id = ?;`,
+     [bookingId]
+     );
+   }
 
   const getMemberPointById = async (memberId) => {
     const [member] = await dataSource.query(
-        `SELECT id, point FROM members WHERE id = ?`, [memberId]
+        `SELECT id, point FROM members WHERE id = ?;`, [memberId]
     );
-    console.log(member)
     return member;
   };
 
   const updateMemberPoints = async (memberId, newPoint) => {
-    await dataSource.query(`UPDATE members SET point = ? WHERE id = ?`,
+    await dataSource.query(`UPDATE members SET point = ? WHERE id = ?;`,
    [newPoint, memberId] );
   };
 
-  
+  const pendPayment = async ( bookingNumber, memberId , screeningId, totalPrice ) => {
+    await dataSource.query(`
+        INSERT INTO bookings (booking_number, member_id, screening_id, total_price, status)
+        VALUES (?, ?, ?, ?, 'pending');`,
+         [bookingNumber, memberId, screeningId, totalPrice]
+    );
+  };
+
+  const getBookingId = async ( bookingNumber ) => {
+    const [bookingId] = await dataSource.query(`
+        SELECT id FROM bookings WHERE booking_number = ?;`,
+        [bookingNumber] );
+    return bookingId.id
+  };
+
+  const pendSeat = async ( bookingId, seatId ) => {
+    await dataSource.query(`
+        INSERT INTO bookings_seats (booking_id, seat_id, status)
+        VALUES (?, ?, 'pending');`
+        , [bookingId, seatId]
+        );
+  }
+
+  const getBookingInfo = async (bookingId) => {
+    const [result] = await dataSource.query(`
+            SELECT
+                bookings.total_price AS totalPrice,
+                members.point AS memberPoint,
+                bookings.status AS status
+            FROM
+                bookings
+            INNER JOIN
+                members ON bookings.member_id = members.id
+            WHERE
+                bookings.id = ?;`,
+                [bookingId]
+                );
+        return result;
+  }
 
 
-  module.exports = { createBooking, getMemberPointById, updateMemberPoints }
+  const getTotalPriceByBookingId = async (bookingId) => {
+    const [result] = await dataSource.query(`
+        SELECT
+            bookings.total_price AS totalPrice
+        FROM
+            bookings
+        WHERE
+            bookings.id = ?;`,
+            [bookingId]
+            );
+    return result.totalPrice;
+  }
+
+  module.exports = { alterBookingSeats, getTotalPriceByBookingId, getBookingInfo, pendSeat, getBookingId, pendPayment, alterBooking, getMemberPointById, updateMemberPoints }

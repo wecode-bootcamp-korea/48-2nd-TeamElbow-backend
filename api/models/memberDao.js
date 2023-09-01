@@ -29,7 +29,7 @@ const createMember = async (memberSignInId, hashedPassword, memberName, memberPh
         throw error;
     }
 };
-const getMemberByMemberId = async (memberId) => {
+const getMemberByMemberId = async (memberSignInId) => {
     const [member] = await dataSource.query(
         `
         SELECT
@@ -44,9 +44,9 @@ const getMemberByMemberId = async (memberId) => {
         point,
         gender
         FROM members
-        WHERE id = ?
+        WHERE member_sign_in_id = ?
         `,
-        [memberId]
+        [memberSignInId]
     );
     return member;
 };

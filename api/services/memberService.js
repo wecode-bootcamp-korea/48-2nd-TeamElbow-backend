@@ -6,8 +6,8 @@ const hashPassword = async (memberPassword) => {
   const saltRounds = 10;
   return await bcrypt.hash(memberPassword, saltRounds);
 };
-const getMemberByMemberId = async (memberId) => {
-  return await memberDao.getMemberByMemberId(memberId);
+const getMemberByMemberId = async (memberSignInId) => {
+  return await memberDao.getMemberByMemberId(memberSignInId);
 };
 const signUp = async (
   memberSignInId,
@@ -55,7 +55,7 @@ const signIn = async (memberSignInId, memberPassword) => {
     err.statusCode = 401;
     throw err;
   }
-  const accessToken = jwt.sign({ id: member.id }, process.env.JWT_SECRET, {
+  const accessToken = jwt.sign({ id: member['member_sign_in_id'] }, process.env.JWT_SECRET, {
     algorithm: process.env.JWT_ALGORITHM,
     expiresIn: process.env.JWT_EXPIRE_IN,
   });
