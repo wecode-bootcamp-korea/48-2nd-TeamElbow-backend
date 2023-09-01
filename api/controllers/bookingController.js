@@ -1,13 +1,44 @@
 const bookingService = require("../services/bookingService");
 const { catchAsync } = require("../utils/error");
 
-// 토탈프라이스 그리고 멤버포인트 차감하는것 부킹아이디에 있는 멤버아이디를 가지고 그 사람의 포인트를 차감한다(x)
+const getAllMoviesInformation = catchAsync(async (req, res) => {
+  const { sortBy } = req.query;
+  const allMoviesInformation = await bookingService.getAllMoviesInformation(sortBy);
 
-// DAO 단에서 부킹 아이디를 가지고 부킹태아블 안에 있는 멤버아이디를 가지고 bookings_seats 그리고 bookings 테이블 안에 있는
-// 좌석정보(seat_id)들을 가지고 온다 상태를 -> confirmed 로 바꾸어 놓는다(x)
+  res.status(200).json(allMoviesInformation);
+});
 
-// 자동으로 업데이트 시켜야한다 결제시점 그리고 status confirmed 로 변경
-// 예매번호(bookingNumber), 관람인원 (seatIds), 좌석정보 ?, totalPrice
+const getDate = catchAsync(async (req, res) => {
+  const { movieId } = req.query;
+  const date = await bookingService.getDate(movieId);
+
+  res.status(200).json(date);
+});
+
+const getSchedule = catchAsync(async (req, res) => {
+  const { movieId, date } = req.query;
+  const schedule = await bookingService.getSchedule(movieId, date);
+
+  res.status(200).json(schedule);
+});
+
+const getSeatsInformation = catchAsync(async (req, res) => {
+  const { screeningId } = await req.query;
+  const seatsInformation = await bookingService.getSeatsInformation(screeningId);
+  await res.json(seatsInformation);
+});
+
+const getMovieInformationInSeatsSelection = catchAsync(async (req, res) => {
+  const { screeningId } = await req.query;
+  const movieInformation = await bookingService.getMovieInformationInSeatsSelection(screeningId);
+  await res.json(movieInformation);
+});
+
+const getIsEarlybird = catchAsync(async (req, res) => {
+  const { screeningId } = await req.query;
+  const isEarlyBird = await bookingService.getIsEalrybirdByscreeningId(screeningId);
+  await res.json(isEarlyBird);
+});
 
 const processPayment = catchAsync(async (req, res) => {
     const { bookingId } = await req.query;
@@ -47,4 +78,13 @@ const getBookingInfo = catchAsync(async(req, res) => {
     res.json(bookingInfo)
 });
 
-module.exports = { getBookingInfo, processPayment, pendPayment, pendSeat, processPending  };
+
+module.exports = {
+  getAllMoviesInformation,
+  getDate,
+  getSchedule,
+  getSeatsInformation,
+  getMovieInformationInSeatsSelection,
+  getIsEarlybird,
+  getBookingInfo, processPayment, pendPayment, pendSeat, processPending
+};

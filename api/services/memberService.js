@@ -2,13 +2,16 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const memberDao = require("../models/memberDao");
 const validator = require("../utils/validators");
+
 const hashPassword = async (memberPassword) => {
   const saltRounds = 10;
   return await bcrypt.hash(memberPassword, saltRounds);
 };
+
 const getMemberByMemberId = async (memberSignInId) => {
   return await memberDao.getMemberByMemberId(memberSignInId);
 };
+
 const signUp = async (
   memberSignInId,
   memberPassword,
@@ -42,6 +45,7 @@ const signUp = async (
   );
   return createMember;
 };
+
 const signIn = async (memberSignInId, memberPassword) => {
   const member = await memberDao.getMemberByMemberId(memberSignInId);
   if (!member) {
@@ -61,6 +65,7 @@ const signIn = async (memberSignInId, memberPassword) => {
   });
   return accessToken;
 };
+
 module.exports = {
   signUp,
   signIn,

@@ -20,7 +20,7 @@ const getAllMoviesInformation = async (req) => {
 };
 
 const getSpecificMovieInformation = async (movieId) => {
-  const specificMovieInformation = await movieDao.getSpecificMovieInformation(
+  const [specificMovieInformation] = await movieDao.getSpecificMovieInformation(
     movieId
   );
   return specificMovieInformation;
