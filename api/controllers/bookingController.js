@@ -41,43 +41,44 @@ const getIsEarlybird = catchAsync(async (req, res) => {
 });
 
 const processPayment = catchAsync(async (req, res) => {
-    const { bookingId } = await req.query;
-    const memberId = await req.member.id
-    await bookingService.deductPoints(memberId, bookingId);
-    await bookingService.alterBooking(bookingId);
-    await bookingService.alterBookingSeats(bookingId);
-    res.json({ message: "Payment successful."});
-})
-
-
-const pendPayment = catchAsync(async(req, res) => {
-    const { totalPrice, seatIds, screeningId } = await req.body;
-    const memberId = await req.memberId
-    await bookingService.pendPayment(memberId, screeningId, totalPrice, seatIds)
-    res.json({ message: "Payment in pending"})
-} );
-
-const pendSeat = catchAsync(async(req, res) => {
-    const { bookingId, seatIds } = await req.body;
-    await bookingService.pendSeat
+  const { bookingId } = await req.query;
+  const memberId = await req.member.id;
+  await bookingService.deductPoints(memberId, bookingId);
+  await bookingService.alterBooking(bookingId);
+  await bookingService.alterBookingSeats(bookingId);
+  const movieId = await bookingService.getMovieIdBybookingId(bookingId);
+  await bookingService.calculateBookingRate(movieId);
+  await bookingService.recordBookingRate(movieId);
+  res.json({ message: "Payment successful." });
 });
 
-const processPending = catchAsync(async(req, res) => {
-    const { totalPrice, seatIds, screeningId } = await req.body
-    const memberId = await req.member.id
-    const bookingNumber = await bookingService.createBookingNumber(screeningId, seatIds)
-    await bookingService.pendPayment(bookingNumber, memberId , screeningId, totalPrice)
-    const bookingId = await bookingService.getBookingId(bookingNumber)
-    await seatIds.forEach((seatId)=>bookingService.pendSeat(bookingId,seatId))
-    await res.json({message: "Payment in pending", bookingId: `${bookingId}`})
+const pendPayment = catchAsync(async (req, res) => {
+  const { totalPrice, seatIds, screeningId } = await req.body;
+  const memberId = await req.memberId;
+  await bookingService.pendPayment(memberId, screeningId, totalPrice, seatIds);
+  res.json({ message: "Payment in pending" });
 });
 
-const getBookingInfo = catchAsync(async(req, res) => {
-    const { bookingId } = req.query;
-    const bookingInfo = await bookingService.getBookingInfo(bookingId);
-    res.json(bookingInfo)
+const pendSeat = catchAsync(async (req, res) => {
+  const { bookingId, seatIds } = await req.body;
+  await bookingService.pendSeat;
 });
 
+const processPending = catchAsync(async (req, res) => {
+  const { totalPrice, seatIds, screeningId } = await req.body;
+  const memberId = await req.member.id;
+  const bookingNumber = await bookingService.createBookingNumber(screeningId, seatIds);
+  await bookingService.pendPayment(bookingNumber, memberId, screeningId, totalPrice);
+  const bookingId = await bookingService.getBookingId(bookingNumber);
+  await seatIds.forEach((seatId) => bookingService.pendSeat(bookingId, seatId));
+  await res.json({ message: "Payment in pending", bookingId: `${bookingId}` });
+});
+
+const getBookingInfo = catchAsync(async (req, res) => {
+  const { bookingId } = req.query;
+  const bookingInfo = await bookingService.getBookingInfo(bookingId);
+  res.json(bookingInfo);
+});
 
 module.exports = {
   getAllMoviesInformation,
@@ -86,5 +87,9 @@ module.exports = {
   getSeatsInformation,
   getMovieInformationInSeatsSelection,
   getIsEarlybird,
-  getBookingInfo, processPayment, pendPayment, pendSeat, processPending
+  getBookingInfo,
+  processPayment,
+  pendPayment,
+  pendSeat,
+  processPending,
 };

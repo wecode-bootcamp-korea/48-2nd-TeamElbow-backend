@@ -15,5 +15,4 @@ bookingRouter.patch("/pay", auth.loginRequired, bookingController.processPayment
 bookingRouter.post("/pending", auth.loginRequired, bookingController.processPending);
 bookingRouter.get("/pay", auth.loginRequired, bookingController.getBookingInfo);
 
-
 module.exports = { bookingRouter };

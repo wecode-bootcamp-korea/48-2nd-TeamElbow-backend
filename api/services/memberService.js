@@ -59,7 +59,7 @@ const signIn = async (memberSignInId, memberPassword) => {
     err.statusCode = 401;
     throw err;
   }
-  const accessToken = jwt.sign({ id: member['member_sign_in_id'] }, process.env.JWT_SECRET, {
+  const accessToken = jwt.sign({ id: member["member_sign_in_id"] }, process.env.JWT_SECRET, {
     algorithm: process.env.JWT_ALGORITHM,
     expiresIn: process.env.JWT_EXPIRE_IN,
   });
