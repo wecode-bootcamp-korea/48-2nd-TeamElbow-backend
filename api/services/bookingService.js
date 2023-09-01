@@ -1,5 +1,16 @@
 const bookingDao = require("../models/bookingDao");
 
+const getAllMoviesInformation = async (sortBy) => {
+  return await bookingDao.getAllMoviesInformation(sortBy);
+};
+
+const getDate = async (movieId) => {
+  return await bookingDao.getDate(movieId);
+};
+const getSchedule = async (movieId, date) => {
+  return await bookingDao.getSchedule(movieId, date);
+};
+
 const getSeatsInformation = async (screeningId) => {
   const seatsInformation = await bookingDao.getSeatsInformation(screeningId);
   return seatsInformation;
@@ -59,4 +70,7 @@ module.exports = {
   getSeatPrice,
   getTotalPrice,
   getIsEalrybirdByscreeningId,
+  getAllMoviesInformation,
+  getDate,
+  getSchedule,
 };
