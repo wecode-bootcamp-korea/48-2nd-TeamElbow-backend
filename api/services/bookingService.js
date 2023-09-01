@@ -11,10 +11,13 @@ const getSchedule = async (movieId, date) => {
     return await bookingDao.getSchedule(movieId, date);
 };
 
-
+const getMyTicket = async (member) => {
+    return await bookingDao.getMyTicket(member);
+};
 
 module.exports = {
     getAllMoviesInformation,
     getDate,
-    getSchedule
+    getSchedule,
+    getMyTicket
 };

@@ -22,8 +22,16 @@ const getSchedule = catchAsync(async (req, res) => {
     res.status(200).json( schedule );
 });
 
+const getMyTicket = catchAsync(async (req, res) => {
+    const member = req.member.id;
+    const myTicket = await bookingService.getMyTicket(member);
+
+    res.status(200).json( myTicket );
+});
+
 module.exports = {
     getAllMoviesInformation,
     getDate,
-    getSchedule
+    getSchedule,
+    getMyTicket
 };

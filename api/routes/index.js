@@ -9,5 +9,4 @@ router.use('/member', memberRouter);
 router.use('/movies', movieRouter);
 router.use("/booking", bookingRouter);
 
-
 module.exports = { router };
