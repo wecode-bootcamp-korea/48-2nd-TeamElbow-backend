@@ -118,14 +118,21 @@ const getSeatsInformation = async (screeningId) => {
     const seatsInformation = await dataSource.query(
       `SELECT 
       s.seat_row AS seatRow,
-      JSON_ARRAYAGG(
-        JSON_OBJECT(
-          'seatId', s.id,
-          'seatColumn', s.seat_column, 
-          'seatType', st.type_name, 
-          'isSeatBooked', CASE WHEN b.id IS NULL THEN true ELSE false END
-          )
-        ) AS seats
+      CAST(
+        CONCAT(
+          '[',
+          GROUP_CONCAT(
+            CONCAT(
+              '{"seatId": ', s.id, ', "seatColumn": "', s.seat_column, 
+              '", "seatType": "', st.type_name, '", "isSeatBooked": ',
+              CASE WHEN b.id IS NULL THEN false ELSE true END,
+              '}'
+            )
+            ORDER BY s.id
+          ),
+          ']'
+        ) AS JSON
+      ) AS seats
      FROM seats s 
      LEFT JOIN bookings_seats bs 
      ON bs.seat_id = s.id 
@@ -140,7 +147,7 @@ const getSeatsInformation = async (screeningId) => {
       theater_id 
       FROM screenings 
       WHERE id = ?)
-      GROUP BY s.seat_row
+      GROUP BY s.seat_row 
      ;`,
       [screeningId, screeningId]
     );
