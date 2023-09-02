@@ -78,7 +78,7 @@ const processPending = catchAsync(async (req, res) => {
 const getBookingInfo = catchAsync(async (req, res) => {
   const { bookingId } = req.query;
   const bookingInfo = await bookingService.getBookingInfo(bookingId);
-  res.json(bookingInfo);
+  await res.json(bookingInfo);
 });
 
 const getMyTicket = catchAsync(async (req, res) => {
