@@ -523,7 +523,7 @@ const getMyTicket = async (member) => {
             `
             SELECT 
             b.id AS bookingId, 
-            CONCAT(m.minimum_watching_age, '세 이상') AS movieMinimumWatchingAge, 
+            CONCAT(m.minimum_watching_age) AS movieMinimumWatchingAge, 
             m.movie_title AS movieTitle, 
             CONCAT(
             DATE_FORMAT(s.screening_time, '%Y.%m.%d '), 
