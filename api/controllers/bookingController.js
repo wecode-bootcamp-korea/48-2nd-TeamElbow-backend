@@ -61,7 +61,7 @@ const pendPayment = catchAsync(async (req, res) => {
 
 const pendSeat = catchAsync(async (req, res) => {
   const { bookingId, seatIds } = await req.body;
-  await bookingService.pendSeat;
+  await bookingService.pendSeat(bookingId, seatIds);
 });
 
 const processPending = catchAsync(async (req, res) => {
