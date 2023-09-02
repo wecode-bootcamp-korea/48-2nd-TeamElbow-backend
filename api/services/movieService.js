@@ -13,16 +13,12 @@ const getAllMoviesInformation = async (req) => {
     }
   };
 
-  const allMoviesInformation = await movieDao.getAllMoviesInformation(
-    await ordering(sortBy)
-  );
+  const allMoviesInformation = await movieDao.getAllMoviesInformation(await ordering(sortBy));
   return allMoviesInformation;
 };
 
 const getSpecificMovieInformation = async (movieId) => {
-  const specificMovieInformation = await movieDao.getSpecificMovieInformation(
-    movieId
-  );
+  const [specificMovieInformation] = await movieDao.getSpecificMovieInformation(movieId);
   return specificMovieInformation;
 };
 module.exports = { getAllMoviesInformation, getSpecificMovieInformation };
