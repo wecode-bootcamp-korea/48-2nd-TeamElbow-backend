@@ -80,16 +80,24 @@ const getBookingInfo = catchAsync(async (req, res) => {
   res.json(bookingInfo);
 });
 
+const getMyTicket = catchAsync(async (req, res) => {
+    const member = req.member.id;
+    const myTicket = await bookingService.getMyTicket(member);
+
+    res.status(200).json( myTicket );
+});
+
 module.exports = {
-  getAllMoviesInformation,
-  getDate,
-  getSchedule,
-  getSeatsInformation,
-  getMovieInformationInSeatsSelection,
-  getIsEarlybird,
-  getBookingInfo,
-  processPayment,
-  pendPayment,
-  pendSeat,
-  processPending,
+    getAllMoviesInformation,
+    getDate,
+    getSchedule,
+    getSeatsInformation,
+    getMovieInformationInSeatsSelection,
+    getIsEarlybird,
+    getBookingInfo,
+    processPayment,
+    pendPayment,
+    pendSeat,
+    processPending,
+    getMyTicket
 };

@@ -126,25 +126,28 @@ const recordBookingRate = async (movieId) => {
   await bookingDao.recordBookingRate(movieId);
 };
 
+const getMyTicket = async (member) => {
+  return await bookingDao.getMyTicket(member);
+};
+
+
 module.exports = {
-  alterBookingSeats,
-  alterBooking,
-  getBookingInfo,
-  getBookingId,
-  pendSeat,
-  pendPayment,
-  createBookingNumber,
-  deductPoints,
-  createBooking,
-  getSeatsInformation,
-  getMovieInformationInSeatsSelection,
-  getSeatPrice,
-  getTotalPrice,
-  getIsEalrybirdByscreeningId,
-  getAllMoviesInformation,
-  getDate,
-  getSchedule,
-  getMovieIdBybookingId,
-  calculateBookingRate,
-  recordBookingRate,
+    alterBookingSeats,
+    alterBooking,
+    getBookingInfo,
+    getBookingId,
+    pendSeat,
+    pendPayment,
+    createBookingNumber,
+    deductPoints,
+    createBooking,
+    getSeatsInformation,
+    getMovieInformationInSeatsSelection,
+    getSeatPrice,
+    getTotalPrice,
+    getIsEalrybirdByscreeningId,
+    getAllMoviesInformation,
+    getDate,
+    getSchedule,
+    getMyTicket
 };
