@@ -27,13 +27,20 @@ const getAllMoviesInformation = async (sortBy) => {
 };
 
 const getOrdering = (sortBy) => {
-  switch (sortBy) {
-    case "bookingRate":
-      return `ORDER BY -bookingRatePercent`;
-    case "alphabet":
-      return `ORDER BY movieTitle`;
-    default:
-      return `ORDER BY -bookingRatePercent`;
+  try {
+    switch (sortBy) {
+      case "bookingRate":
+        return `ORDER BY -bookingRatePercent`;
+      case "alphabet":
+        return `ORDER BY movieTitle`;
+      default:
+        return `ORDER BY -bookingRatePercent`;
+    }
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
   }
 };
 
@@ -111,14 +118,21 @@ const getSeatsInformation = async (screeningId) => {
     const seatsInformation = await dataSource.query(
       `SELECT 
       s.seat_row AS seatRow,
-      JSON_ARRAYAGG(
-        JSON_OBJECT(
-          'seatId', s.id,
-          'seatColumn', s.seat_column, 
-          'seatType', st.type_name, 
-          'isSeatBooked', CASE WHEN b.id IS NULL THEN 'false' ELSE 'true' END
-          )
-        ) AS seats
+      CAST(
+        CONCAT(
+          '[',
+          GROUP_CONCAT(
+            CONCAT(
+              '{"seatId": ', s.id, ', "seatColumn": "', s.seat_column, 
+              '", "seatType": "', st.type_name, '", "isSeatBooked": ',
+              CASE WHEN b.id IS NULL THEN false ELSE true END,
+              '}'
+            )
+            ORDER BY s.id
+          ),
+          ']'
+        ) AS JSON
+      ) AS seats
      FROM seats s 
      LEFT JOIN bookings_seats bs 
      ON bs.seat_id = s.id 
@@ -133,7 +147,7 @@ const getSeatsInformation = async (screeningId) => {
       theater_id 
       FROM screenings 
       WHERE id = ?)
-      GROUP BY s.seat_row
+      GROUP BY s.seat_row 
      ;`,
       [screeningId, screeningId]
     );
@@ -289,6 +303,221 @@ const getSeatPrice = async (audienceTypeId, screeningTypeId, isEarlybird, seatTy
   }
 };
 
+const alterBooking = async (bookingId) => {
+  try {
+    await dataSource.query(
+      `UPDATE bookings
+   SET status = 'confirmed'
+   WHERE id = ?;`,
+      [bookingId]
+    );
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const alterBookingSeats = async (bookingId) => {
+  try {
+    await dataSource.query(
+      `UPDATE bookings_seats
+    SET status = 'confirmed'
+    WHERE booking_id = ?;`,
+      [bookingId]
+    );
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const getMemberPointById = async (memberId) => {
+  try {
+    const [member] = await dataSource.query(`SELECT id, point FROM members WHERE id = ?;`, [memberId]);
+    return member;
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const updateMemberPoints = async (memberId, newPoint) => {
+  try {
+    await dataSource.query(`UPDATE members SET point = ? WHERE id = ?;`, [newPoint, memberId]);
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const pendPayment = async (bookingNumber, memberId, screeningId, totalPrice) => {
+  try {
+    await dataSource.query(
+      `
+       INSERT INTO bookings (booking_number, member_id, screening_id, total_price, status)
+       VALUES (?, ?, ?, ?, 'pending');`,
+      [bookingNumber, memberId, screeningId, totalPrice]
+    );
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const getBookingId = async (bookingNumber) => {
+  try {
+    const [bookingId] = await dataSource.query(
+      `
+       SELECT id FROM bookings WHERE booking_number = ?;`,
+      [bookingNumber]
+    );
+    return bookingId.id;
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const pendSeat = async (bookingId, seatId) => {
+  try {
+    await dataSource.query(
+      `
+       INSERT INTO bookings_seats (booking_id, seat_id, status)
+       VALUES (?, ?, 'pending');`,
+      [bookingId, seatId]
+    );
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const getBookingInfo = async (bookingId) => {
+  try {
+    const [result] = await dataSource.query(
+      `
+           SELECT
+               bookings.total_price AS totalPrice,
+               members.point AS memberPoint,
+               bookings.status AS status
+           FROM
+               bookings
+           INNER JOIN
+               members ON bookings.member_id = members.id
+           WHERE
+               bookings.id = ?;`,
+      [bookingId]
+    );
+    return result;
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const getTotalPriceByBookingId = async (bookingId) => {
+  try {
+    const [result] = await dataSource.query(
+      `
+       SELECT
+           bookings.total_price AS totalPrice
+       FROM
+           bookings
+       WHERE
+           bookings.id = ?;`,
+      [bookingId]
+    );
+    return result.totalPrice;
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const getMovieIdBybookingId = async (bookingId) => {
+  try {
+    const [{ movieId }] = await dataSource.query(
+      `select s.movie_id AS movieId from bookings b inner join screenings s on b.screening_id = s.id
+    where b.id =?`,
+      [bookingId]
+    );
+    return movieId;
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
+const calculateBookingRate = async (movieId) => {
+  try {
+    const [allBookings] = await dataSource.query(
+      `SELECT
+    COUNT(id) as denominator
+    FROM
+    bookings_seats;`
+    );
+    const [specificBookings] = await dataSource.query(
+      `SELECT
+      COUNT(movie_id) as numerator
+     FROM
+      (SELECT
+        bs.id,
+        s.movie_id
+        FROM bookings_seats bs
+        LEFT JOIN screenings s
+        ON bs.screening_id = s.id
+        where movie_id = ?) t
+     group by movie_id;`,
+      [movieId]
+    );
+    const bookingRatePercent = (specificBookings["numerator"] / allBookings["denominator"]) * 100;
+    return bookingRatePercent;
+  } catch (err) {
+    console.log(err);
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+    throw error;
+  }
+};
+
+const recordBookingRate = async (movieId, bookingRatePercent) => {
+  try {
+    await dataSource.query(
+      `UPDATE 
+      movies 
+     SET booking_rate_percent=?
+     WHERE id = ?;`,
+      [bookingRatePercent, movieId]
+    );
+  } catch (err) {
+    console.log(err);
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
 module.exports = {
   getAllMoviesInformation,
   getDate,
@@ -300,4 +529,16 @@ module.exports = {
   getIsEarlybirdByScreeningId,
   getSeatTypIdeBySeatId,
   getSeatPrice,
+  alterBookingSeats,
+  getTotalPriceByBookingId,
+  getBookingInfo,
+  pendSeat,
+  getBookingId,
+  pendPayment,
+  alterBooking,
+  getMemberPointById,
+  updateMemberPoints,
+  getMovieIdBybookingId,
+  calculateBookingRate,
+  recordBookingRate,
 };

@@ -8,8 +8,7 @@ const getAllMoviesInformation = catchAsync(async (req, res) => {
 
 const getSpecificMovieInformation = catchAsync(async (req, res) => {
   const { movieId } = await req.query;
-  const specificMovieInformation =
-    await movieService.getSpecificMovieInformation(movieId);
+  const specificMovieInformation = await movieService.getSpecificMovieInformation(movieId);
   res.json(specificMovieInformation);
 });
 

@@ -1,12 +1,10 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
 const memberDao = require("../models/memberDao");
 const validator = require("../utils/validators");
 
 const hashPassword = async (memberPassword) => {
   const saltRounds = 10;
-
   return await bcrypt.hash(memberPassword, saltRounds);
 };
 
@@ -29,14 +27,12 @@ const signUp = async (
   validator.validateMemberBirthday(memberBirthday);
   validator.validateMemberGender(memberGender);
   validator.validateMemberId(memberSignInId);
-
   const member = await memberDao.getMemberByMemberId(memberSignInId);
   if (member) {
     const err = new Error("duplicated member");
     err.statusCode = 400;
     throw err;
   }
-
   const hashedPassword = await hashPassword(memberPassword);
   const createMember = await memberDao.createMember(
     memberSignInId,
@@ -52,24 +48,18 @@ const signUp = async (
 
 const signIn = async (memberSignInId, memberPassword) => {
   const member = await memberDao.getMemberByMemberId(memberSignInId);
-
   if (!member) {
     const err = new Error("INVALID_MEMBER");
     err.statusCode = 401;
-
     throw err;
   }
-
   const isMatched = await bcrypt.compare(memberPassword, member.password);
-
   if (!isMatched) {
     const err = new Error("INVALID_MEMBER");
     err.statusCode = 401;
-
     throw err;
   }
-
-  const accessToken = jwt.sign({ id: member['member_sign_in_id'] }, process.env.JWT_SECRET, {
+  const accessToken = jwt.sign({ id: member["member_sign_in_id"] }, process.env.JWT_SECRET, {
     algorithm: process.env.JWT_ALGORITHM,
     expiresIn: process.env.JWT_EXPIRE_IN,
   });
