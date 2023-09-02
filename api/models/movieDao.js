@@ -17,7 +17,6 @@ const getAllMoviesInformation = async (ordering) => {
     );
     return allMoviesInformation;
   } catch (err) {
-    console.log(err);
     const error = new Error("dataSource Error");
     error.statusCode = 400;
 
@@ -50,7 +49,6 @@ const getSpecificMovieInformation = async (movieId) => {
     );
     return specificMovieInformation;
   } catch (err) {
-    console.log(err);
     const error = new Error("dataSource Error");
     error.statusCode = 400;
 

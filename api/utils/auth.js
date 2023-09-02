@@ -11,7 +11,6 @@ const loginRequired = async (req, res, next) => {
     }
 
     const payload = await jwt.verify(accessToken, process.env.JWT_SECRET);
-
     const member = await memberService.getMemberByMemberId(payload["member_sign_in_id"]);
 
     if (!member) {

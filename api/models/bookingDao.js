@@ -494,7 +494,6 @@ const calculateBookingRate = async (movieId) => {
     const bookingRatePercent = (specificBookings["numerator"] / allBookings["denominator"]) * 100;
     return bookingRatePercent;
   } catch (err) {
-    console.log(err);
     const error = new Error("dataSource Error");
     error.statusCode = 400;
     throw error;
@@ -511,7 +510,6 @@ const recordBookingRate = async (movieId, bookingRatePercent) => {
       [bookingRatePercent, movieId]
     );
   } catch (err) {
-    console.log(err);
     const error = new Error("dataSource Error");
     error.statusCode = 400;
 
