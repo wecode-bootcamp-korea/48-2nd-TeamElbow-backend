@@ -56,7 +56,6 @@ const pendPayment = catchAsync(async (req, res) => {
   const { totalPrice, seatIds, screeningId } = await req.body;
   const memberId = await req.memberId;
   await bookingService.pendPayment(memberId, screeningId, totalPrice, seatIds);
-  res.json({ message: "Payment in pending" });
 });
 
 const pendSeat = catchAsync(async (req, res) => {
@@ -67,11 +66,13 @@ const pendSeat = catchAsync(async (req, res) => {
 const processPending = catchAsync(async (req, res) => {
   const { totalPrice, seatIds, screeningId } = await req.body;
   const memberId = await req.member.id;
-  const bookingNumber = await bookingService.createBookingNumber(screeningId, seatIds);
+  const bookingNumber = await bookingService.createBookingNumber(screeningId, seatIds[0].seatId);
   await bookingService.pendPayment(bookingNumber, memberId, screeningId, totalPrice);
   const bookingId = await bookingService.getBookingId(bookingNumber);
-  await seatIds.forEach((seatId) => bookingService.pendSeat(bookingId, seatId));
-  await res.json({ message: "Payment in pending", bookingId: `${bookingId}` });
+  await seatIds.forEach((seatId) => {
+    bookingService.pendSeat(bookingId, seatId.seatId);
+  });
+  await res.json({ bookingId: bookingId });
 });
 
 const getBookingInfo = catchAsync(async (req, res) => {

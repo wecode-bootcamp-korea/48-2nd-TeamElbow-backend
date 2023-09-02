@@ -20,7 +20,7 @@ const createBooking = async (memberId, screeningId, seatIds, totalPrice) => {
 };
 
 const createBookingNumber = async (screeningId, seatIds) => {
-  const bookingNumber = (await screeningId.toString()) + "-" + (await seatIds[0].toString());
+  const bookingNumber = (await screeningId) + "-" + (await seatIds);
   return bookingNumber;
 };
 
