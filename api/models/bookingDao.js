@@ -124,7 +124,7 @@ const getSeatsInformation = async (screeningId) => {
             CONCAT(
               '{"seatId": ', s.id, ', "seatColumn": "', s.seat_column, 
               '", "seatType": "', st.type_name, '", "isSeatBooked": ',
-              CASE WHEN b.id IS NULL THEN false ELSE true END,
+              CASE WHEN NOT b.screening_id <> ? THEN true ELSE false END,
               '}'
             )
             ORDER BY s.id
@@ -139,9 +139,8 @@ const getSeatsInformation = async (screeningId) => {
      ON b.id = bs.booking_id 
      INNER JOIN seat_types st 
      ON st.id=s.seat_type_id 
-     WHERE screening_id = ? 
-     OR screening_id is null 
-     AND theater_id = (
+     WHERE  
+     s.theater_id = (
       SELECT 
       theater_id 
       FROM screenings 
@@ -151,7 +150,8 @@ const getSeatsInformation = async (screeningId) => {
       [screeningId, screeningId]
     );
     return seatsInformation;
-  } catch {
+  } catch (err) {
+    console.log(err);
     const error = new Error("dataSource Error");
     error.statusCode = 400;
 
