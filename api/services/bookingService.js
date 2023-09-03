@@ -6,7 +6,7 @@ const deductPoints = async (memberId, bookingId) => {
   const { status } = await bookingDao.getBookingInfo(bookingId);
   if (status === "confirmed") {
     throw new Error("payment already confirmed");
-  } else if (member.point < amount) {
+  } else if (Number(member.point) < Number(amount)) {
     throw new Error("Insufficient points.");
   }
 
@@ -122,32 +122,34 @@ const calculateBookingRate = async (movieId) => {
   return await bookingDao.calculateBookingRate(movieId);
 };
 
-const recordBookingRate = async (movieId) => {
-  await bookingDao.recordBookingRate(movieId);
+const recordBookingRate = async (movieId, bookingRatePercent) => {
+  await bookingDao.recordBookingRate(movieId, bookingRatePercent);
 };
 
 const getMyTicket = async (member) => {
   return await bookingDao.getMyTicket(member);
 };
 
-
 module.exports = {
-    alterBookingSeats,
-    alterBooking,
-    getBookingInfo,
-    getBookingId,
-    pendSeat,
-    pendPayment,
-    createBookingNumber,
-    deductPoints,
-    createBooking,
-    getSeatsInformation,
-    getMovieInformationInSeatsSelection,
-    getSeatPrice,
-    getTotalPrice,
-    getIsEalrybirdByscreeningId,
-    getAllMoviesInformation,
-    getDate,
-    getSchedule,
-    getMyTicket
+  alterBookingSeats,
+  alterBooking,
+  getBookingInfo,
+  getBookingId,
+  pendSeat,
+  pendPayment,
+  createBookingNumber,
+  deductPoints,
+  createBooking,
+  getSeatsInformation,
+  getMovieInformationInSeatsSelection,
+  getSeatPrice,
+  getTotalPrice,
+  getIsEalrybirdByscreeningId,
+  getAllMoviesInformation,
+  getDate,
+  getSchedule,
+  getMyTicket,
+  getMovieIdBybookingId,
+  calculateBookingRate,
+  recordBookingRate,
 };

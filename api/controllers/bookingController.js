@@ -47,8 +47,8 @@ const processPayment = catchAsync(async (req, res) => {
   await bookingService.alterBooking(bookingId);
   await bookingService.alterBookingSeats(bookingId);
   const movieId = await bookingService.getMovieIdBybookingId(bookingId);
-  await bookingService.calculateBookingRate(movieId);
-  await bookingService.recordBookingRate(movieId);
+  const bookingRatePercent = await bookingService.calculateBookingRate(movieId);
+  await bookingService.recordBookingRate(movieId, bookingRatePercent);
   res.json({ message: "Payment successful." });
 });
 
@@ -78,27 +78,27 @@ const processPending = catchAsync(async (req, res) => {
 const getBookingInfo = catchAsync(async (req, res) => {
   const { bookingId } = req.query;
   const bookingInfo = await bookingService.getBookingInfo(bookingId);
-  await res.json(bookingInfo);
+  res.json(bookingInfo);
 });
 
 const getMyTicket = catchAsync(async (req, res) => {
-    const member = req.member.id;
-    const myTicket = await bookingService.getMyTicket(member);
+  const member = req.member.id;
+  const myTicket = await bookingService.getMyTicket(member);
 
-    res.status(200).json( myTicket );
+  res.status(200).json(myTicket);
 });
 
 module.exports = {
-    getAllMoviesInformation,
-    getDate,
-    getSchedule,
-    getSeatsInformation,
-    getMovieInformationInSeatsSelection,
-    getIsEarlybird,
-    getBookingInfo,
-    processPayment,
-    pendPayment,
-    pendSeat,
-    processPending,
-    getMyTicket
+  getAllMoviesInformation,
+  getDate,
+  getSchedule,
+  getSeatsInformation,
+  getMovieInformationInSeatsSelection,
+  getIsEarlybird,
+  getBookingInfo,
+  processPayment,
+  pendPayment,
+  pendSeat,
+  processPending,
+  getMyTicket,
 };

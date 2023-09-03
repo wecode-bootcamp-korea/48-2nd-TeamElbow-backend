@@ -1,6 +1,4 @@
-const {dataSource} = require('./dataSource');
-
-
+const { dataSource } = require("./dataSource");
 
 const getAllMoviesInformation = async (sortBy) => {
   try {
@@ -106,9 +104,9 @@ const getSchedule = async (movieId, date) => {
       [movieId, date]
     );
     return schedule;
-    } catch(err) {
-        const error = new Error("dataSource Error");
-        error.statusCode = 400;
+  } catch (err) {
+    const error = new Error("dataSource Error");
+    error.statusCode = 400;
 
     throw error;
   }
@@ -126,7 +124,7 @@ const getSeatsInformation = async (screeningId) => {
             CONCAT(
               '{"seatId": ', s.id, ', "seatColumn": "', s.seat_column, 
               '", "seatType": "', st.type_name, '", "isSeatBooked": ',
-              CASE WHEN b.id IS NULL THEN false ELSE true END,
+              CASE WHEN NOT b.screening_id <> ? THEN true ELSE false END,
               '}'
             )
             ORDER BY s.id
@@ -141,9 +139,8 @@ const getSeatsInformation = async (screeningId) => {
      ON b.id = bs.booking_id 
      INNER JOIN seat_types st 
      ON st.id=s.seat_type_id 
-     WHERE screening_id = ? 
-     OR screening_id is null 
-     AND theater_id = (
+     WHERE  
+     s.theater_id = (
       SELECT 
       theater_id 
       FROM screenings 
@@ -153,7 +150,8 @@ const getSeatsInformation = async (screeningId) => {
       [screeningId, screeningId]
     );
     return seatsInformation;
-  } catch {
+  } catch (err) {
+    console.log(err);
     const error = new Error("dataSource Error");
     error.statusCode = 400;
 
@@ -485,8 +483,10 @@ const calculateBookingRate = async (movieId) => {
         bs.id,
         s.movie_id
         FROM bookings_seats bs
+        LEFT JOIN bookings b
+        ON bs.booking_id = b.id
         LEFT JOIN screenings s
-        ON bs.screening_id = s.id
+        ON b.screening_id = s.id
         where movie_id = ?) t
      group by movie_id;`,
       [movieId]
@@ -518,9 +518,9 @@ const recordBookingRate = async (movieId, bookingRatePercent) => {
 };
 
 const getMyTicket = async (member) => {
-    try {
-        const myTicket = await dataSource.query(
-            `
+  try {
+    const myTicket = await dataSource.query(
+      `
             SELECT 
             b.id AS bookingId, 
             CONCAT(m.minimum_watching_age) AS movieMinimumWatchingAge, 
@@ -557,39 +557,39 @@ const getMyTicket = async (member) => {
             WHERE b.member_id = ? 
             GROUP BY b.id, m.minimum_watching_age, m.movie_title, s.screening_time, b.booking_number, b.total_price, t.theater_name
             `,
-            [member]
-        )
-        return myTicket
-    } catch(err) {
-        const error = new Error("dataSource error");
-        error.statusCode = 400;
+      [member]
+    );
+    return myTicket;
+  } catch (err) {
+    const error = new Error("dataSource error");
+    error.statusCode = 400;
 
-        throw error;
-    }
+    throw error;
+  }
 };
 
 module.exports = {
-    getAllMoviesInformation,
-    getDate,
-    getSeatsInformation,
-    getMovieInformationInSeatsSelection,
-    getAudienceTypeIdByAudienceType,
-    getScreeningTypeIdByScreeningId,
-    getIsEarlybirdByScreeningId,
-    getSeatTypIdeBySeatId,
-    getSeatPrice,
-    alterBookingSeats,
-    getTotalPriceByBookingId,
-    getBookingInfo,
-    pendSeat,
-    getBookingId,
-    pendPayment,
-    alterBooking,
-    getMemberPointById,
-    updateMemberPoints,
-    getMovieIdBybookingId,
-    calculateBookingRate,
-    recordBookingRate,
-    getSchedule,
-    getMyTicket
-}
+  getAllMoviesInformation,
+  getDate,
+  getSeatsInformation,
+  getMovieInformationInSeatsSelection,
+  getAudienceTypeIdByAudienceType,
+  getScreeningTypeIdByScreeningId,
+  getIsEarlybirdByScreeningId,
+  getSeatTypIdeBySeatId,
+  getSeatPrice,
+  alterBookingSeats,
+  getTotalPriceByBookingId,
+  getBookingInfo,
+  pendSeat,
+  getBookingId,
+  pendPayment,
+  alterBooking,
+  getMemberPointById,
+  updateMemberPoints,
+  getMovieIdBybookingId,
+  calculateBookingRate,
+  recordBookingRate,
+  getSchedule,
+  getMyTicket,
+};
