@@ -1,0 +1,7 @@
+-- migrate:up
+ALTER TABLE bookings
+ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+
+-- migrate:down
+

@@ -568,6 +568,33 @@ const getMyTicket = async (member) => {
   }
 };
 
+const updatePendingToCanceled = async () => {
+  try {
+    const currentTime = new Date();
+    const fiveMinutesAgo = new Date(currentTime.getTime() - 5 * 60 * 1000);
+
+    await dataSource.query(
+      `UPDATE bookings
+      SET status = 'canceled'
+      WHERE status = 'pending' AND booking_time <= ?
+  `,
+      [fiveMinutesAgo]
+    );
+    await dataSource.query(
+      `UPDATE bookings_seats
+      SET status = 'canceled'
+      WHERE status = 'pending' AND booking_time <= ?
+  `,
+      [fiveMinutesAgo]
+    );
+  } catch (err) {
+    const error = new Error("dataSource error");
+    error.statusCode = 400;
+
+    throw error;
+  }
+};
+
 module.exports = {
   getAllMoviesInformation,
   getDate,
@@ -592,4 +619,5 @@ module.exports = {
   recordBookingRate,
   getSchedule,
   getMyTicket,
+  updatePendingToCanceled,
 };
